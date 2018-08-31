@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import os
 import subprocess
+import six
 
 from flask import Response
 
@@ -18,6 +19,12 @@ class ScriptdHandler(object):
     def __init__(self, flask_helper, protocol):  # type: (FlaskHelper, ScriptdProtocol) -> None
         self._fh = flask_helper
         self._pr = protocol
+        self._working_dir = u"."
+
+    def set_working_dir(self, working_dir):
+        if isinstance(working_dir, six.binary_type):
+            working_dir = working_dir.decode("UTF-8")
+        self._working_dir = working_dir
 
     def handle_execution_request(self):
         try:
@@ -25,7 +32,7 @@ class ScriptdHandler(object):
             command = self._pr.parse_execution_request(req)
             if "/" in command or "\\" in command:
                 raise NotPermittedError("Scripts in subdirectories are not allowed")
-            if command not in os.listdir(u"."):
+            if command not in os.listdir(self._working_dir):
                 raise NoSuchScriptError("No such script")
             if not os.access(command, os.X_OK):
                 raise NotPermittedError("File has no execution permission")
@@ -35,8 +42,10 @@ class ScriptdHandler(object):
 
     def _do_execution(self, command):
         try:
-            subp = subprocess.Popen([os.path.join(".", command)], stdout=subprocess.PIPE,
-                                    stderr=subprocess.STDOUT)
+            subp = subprocess.Popen([os.path.join(self._working_dir, command)],
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.STDOUT,
+                                    cwd=self._working_dir)
         except WindowsError:  # os.access with X_OK does not work on Windows
             raise NotPermittedError("File cannot be executed on windows")
 

@@ -2,9 +2,9 @@ from __future__ import print_function
 
 from flask import Flask
 
-from flask_helper import FlaskHelper
-from handler import ScriptdHandler
-from protocol import ScriptdProtocol
+from scriptd.app.flask_helper import FlaskHelper
+from scriptd.app.handler import ScriptdHandler
+from scriptd.app.protocol import ScriptdProtocol
 
 app = Flask(__name__)
 
