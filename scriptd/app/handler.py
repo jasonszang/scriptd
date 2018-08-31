@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """Request handler"""
 from __future__ import print_function
 
@@ -25,8 +26,6 @@ class ScriptdHandler(object):
             if "/" in command or "\\" in command:
                 raise NotPermittedError("Scripts in subdirectories are not allowed")
             if command not in os.listdir(u"."):
-                print(command)
-                print(os.listdir(u"."))
                 raise NoSuchScriptError("No such script")
             if not os.access(command, os.X_OK):
                 raise NotPermittedError("File has no execution permission")
@@ -35,8 +34,11 @@ class ScriptdHandler(object):
             return self._pr.emit_response_frame(str(e))
 
     def _do_execution(self, command):
-        subp = subprocess.Popen([os.path.join(".", command)], stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT)
+        try:
+            subp = subprocess.Popen([os.path.join(".", command)], stdout=subprocess.PIPE,
+                                    stderr=subprocess.STDOUT)
+        except WindowsError:  # os.access with X_OK does not work on Windows
+            raise NotPermittedError("File cannot be executed on windows")
 
         def gen():
             while True:

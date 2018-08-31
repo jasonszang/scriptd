@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """Communication protocol for scriptd"""
 
 
@@ -17,7 +18,7 @@ class ScriptdProtocol(object):
         """Parse script execution request, verify authentication and token, then return the command
         requested to execute."""
         # TODO: decrypt, authentication, verify one-time-use token
-        command = unicode(request)
+        command = request.decode("UTF-8")
         return command
 
     def emit_response_frame(self, data):

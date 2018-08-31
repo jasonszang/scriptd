@@ -1,14 +1,10 @@
 from __future__ import print_function
 
-import subprocess
-import sys
-
 from flask import Flask
-from flask import Response
-from flask import request
+
 from flask_helper import FlaskHelper
-from protocol import ScriptdProtocol
 from handler import ScriptdHandler
+from protocol import ScriptdProtocol
 
 app = Flask(__name__)
 

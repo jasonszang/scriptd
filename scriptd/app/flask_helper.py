@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """Helper for working with flask"""
 
 from flask import Flask

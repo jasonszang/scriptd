@@ -6,12 +6,14 @@ from setuptools import find_packages
 
 setup(
     name="scriptd",
-    version= "0.1.0",
+    version="0.1.0",
     packages=find_packages(),
 
     install_requires=[
+        "cryptography>=2.0",
         "flask>=0.12.1",
-        "cryptography>=2.0"
+        "six>=1.9",
+        "requests>=2.0.0"
     ],
     package_data={},
     entry_points={
@@ -29,4 +31,3 @@ setup(
     keywords="",
     url="",  # project home page, if any
 )
-
