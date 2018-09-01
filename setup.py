@@ -13,6 +13,7 @@ setup(
         "cryptography>=2.0",
         "flask>=0.12.1",
         "six>=1.9",
+        "typing>=3.6.1",
         "requests>=2.0.0"
     ],
     package_data={},

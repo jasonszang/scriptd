@@ -4,9 +4,10 @@ from __future__ import print_function
 
 import os
 import subprocess
-import six
 
+import six
 from flask import Response
+from typing import Text
 
 from scriptd.app.exceptions import (ScriptdError,
                                     NoSuchScriptError,
@@ -22,12 +23,13 @@ class ScriptdHandler(object):
         self._working_dir = u"."
         self._logger = self._fh.get_logger()
 
-    def set_working_dir(self, working_dir):
-        if isinstance(working_dir, six.binary_type):
-            working_dir = working_dir.decode("UTF-8")
+    def set_working_dir(self, working_dir):  # type: (Text) -> None
+        if not isinstance(working_dir, six.text_type):
+            raise TypeError("Expect unicode, got {}".format(type(working_dir).__name__))
         self._working_dir = working_dir
+        return None
 
-    def handle_execution_request(self):
+    def handle_execution_request(self):  # type: () -> Response
         try:
             req = self._fh.get_request_data()
             command = self._pr.parse_execution_request(req)
@@ -42,9 +44,9 @@ class ScriptdHandler(object):
             return self._do_execution(command)
         except ScriptdError as e:
             self._logger.info("Rejected execution request: {}".format(str(e)))
-            return self._pr.emit_response_frame(str(e))
+            return Response(self._pr.emit_frame(str(e)))
 
-    def _do_execution(self, command):
+    def _do_execution(self, command):  # type: (Text) -> Response
         try:
             subp = subprocess.Popen([os.path.join(self._working_dir, command)],
                                     stdout=subprocess.PIPE,
@@ -59,8 +61,8 @@ class ScriptdHandler(object):
                 chunk_size = 64 if subp.returncode is None else -1
                 dat = subp.stdout.read(chunk_size)
                 if len(dat) > 0:
-                    yield self._pr.emit_response_frame(dat)
+                    yield self._pr.emit_frame(dat)
                 if subp.returncode is not None:
-                    return
+                    break
 
-        return Response(gen(), mimetype="text/plain")
+        return Response(gen(), mimetype="application/octet-stream")

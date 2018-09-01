@@ -18,6 +18,6 @@ for h in app.logger.handlers:
     h.setFormatter(log_formatter)
     h.setLevel(logging.INFO)
 app.logger.setLevel(logging.INFO)
-app.logger.propagate=False
+app.logger.propagate = False
 
 app.add_url_rule("/execute", "execute", handler.handle_execution_request, methods=["POST"])
