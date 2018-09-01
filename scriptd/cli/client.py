@@ -24,8 +24,14 @@ def main():
     protocol = ScriptdProtocol()
 
     resp = requests.post("http://{}:{}/execute".format(host, port),
-                         data=protocol.emit_frame(cmd.encode("UTF-8")))
-    six.print_(resp.content)
+                         data=protocol.emit_frame(cmd.encode("UTF-8")),
+                         stream=True)
+    while True:
+        frame = protocol.read_frame_from(resp.raw)
+        if frame is None:
+            break
+        frame_data = protocol.parse_frame(frame)
+        six.print_(frame_data)
 
 
 if __name__ == "__main__":

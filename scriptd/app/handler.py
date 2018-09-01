@@ -44,7 +44,7 @@ class ScriptdHandler(object):
             return self._do_execution(command)
         except ScriptdError as e:
             self._logger.info("Rejected execution request: {}".format(str(e)))
-            return Response(self._pr.emit_frame(str(e)))
+            return Response(self._pr.emit_frame(str(e), with_size_header=True))
 
     def _do_execution(self, command):  # type: (Text) -> Response
         try:
@@ -61,7 +61,7 @@ class ScriptdHandler(object):
                 chunk_size = 64 if subp.returncode is None else -1
                 dat = subp.stdout.read(chunk_size)
                 if len(dat) > 0:
-                    yield self._pr.emit_frame(dat)
+                    yield self._pr.emit_frame(dat, with_size_header=True)
                 if subp.returncode is not None:
                     break
 
