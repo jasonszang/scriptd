@@ -17,5 +17,11 @@ class FlaskHelper(object):
     def get_app(self):  # type: () -> Flask
         return self.app
 
+    def get_logger(self):
+        return self.app.logger
+
     def get_request_data(self):  # type: () -> dict
         return request.get_data()
+
+    def get_remote_addr(self):
+        return request.remote_addr

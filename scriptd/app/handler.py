@@ -20,6 +20,7 @@ class ScriptdHandler(object):
         self._fh = flask_helper
         self._pr = protocol
         self._working_dir = u"."
+        self._logger = self._fh.get_logger()
 
     def set_working_dir(self, working_dir):
         if isinstance(working_dir, six.binary_type):
@@ -36,8 +37,11 @@ class ScriptdHandler(object):
                 raise NoSuchScriptError("No such script")
             if not os.access(command, os.X_OK):
                 raise NotPermittedError("File has no execution permission")
+            self._logger.info("Executing command \"{}\" upon request from: {}"
+                              .format(command, self._fh.get_remote_addr()))
             return self._do_execution(command)
         except ScriptdError as e:
+            self._logger.info("Rejected execution request: {}".format(str(e)))
             return self._pr.emit_response_frame(str(e))
 
     def _do_execution(self, command):
@@ -47,7 +51,7 @@ class ScriptdHandler(object):
                                     stderr=subprocess.STDOUT,
                                     cwd=self._working_dir)
         except WindowsError:  # os.access with X_OK does not work on Windows
-            raise NotPermittedError("File cannot be executed on windows")
+            raise NotPermittedError("File cannot be executed on Windows")
 
         def gen():
             while True:
