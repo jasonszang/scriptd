@@ -9,7 +9,8 @@ import six
 from flask import Response
 from typing import Text
 
-from scriptd.app.exceptions import (ScriptdError,
+from scriptd.app.exceptions import (AuthenticationError,
+                                    ScriptdError,
                                     NoSuchScriptError,
                                     NotPermittedError)
 from scriptd.app.flask_helper import FlaskHelper
@@ -31,6 +32,7 @@ class ScriptdHandler(object):
 
     def handle_execution_request(self):  # type: () -> Response
         try:
+            self._logger.info("Accept request from: {}".format(self._fh.get_remote_addr()))
             req = self._fh.get_request_data()
             command = self._pr.parse_execution_request(req)
             if "/" in command or "\\" in command:
@@ -42,6 +44,9 @@ class ScriptdHandler(object):
             self._logger.info("Executing command \"{}\" upon request from: {}"
                               .format(command, self._fh.get_remote_addr()))
             return self._do_execution(command)
+        except AuthenticationError as e:
+            self._logger.info("Request authentication failed: {}".format(str(e)))
+            return Response("")
         except ScriptdError as e:
             self._logger.info("Rejected execution request: {}".format(str(e)))
             return Response(self._pr.emit_frame(str(e), with_size_header=True))
