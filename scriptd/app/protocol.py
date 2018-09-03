@@ -4,6 +4,7 @@
 import os
 import struct
 from hashlib import sha256
+import threading
 
 from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.backends import default_backend
@@ -17,6 +18,9 @@ from typing import (BinaryIO,
 from scriptd.app.exceptions import AuthenticationError
 
 IV_SIZE = 12
+TOKEN_LENGTH = 16
+TOKEN_STORAGE_LIMIT = 64
+TOKEN_REQUEST_CONTENT = b"TOKEN_REQUEST"
 
 
 class ScriptdProtocol(object):
@@ -25,6 +29,8 @@ class ScriptdProtocol(object):
 
     def __init__(self):
         self._key = None
+        self._tokens = set()
+        self._tokens_mutex = threading.Lock()
 
     def set_key(self, key):  # type: (bytes) -> None
         """Set encryption / decryption key. Must be called before using."""
@@ -32,16 +38,35 @@ class ScriptdProtocol(object):
 
     def generate_token(self):  # type: () -> bytes
         """Generate a one-time-use token"""
-        # TODO: generate cryptographically safe random token, store token
-        return b"dummy"
+        token = os.urandom(TOKEN_LENGTH)
+        with self._tokens_mutex:
+            if len(self._tokens) >= TOKEN_STORAGE_LIMIT:
+                self._tokens.pop()
+            self._tokens.add(token)
+        return token
 
     def parse_execution_request(self, request):  # type: (bytes) -> Text
         """Parse script execution request, verify authentication and token, then return the command
         requested to execute."""
-        # TODO: verify one-time-use token to protect against replay attack
         payload = self.parse_frame(request)
-        command = payload.decode("UTF-8")
+        if len(payload) <= TOKEN_LENGTH:
+            raise AuthenticationError("Execution request too short, no token provided?")
+        token = payload[:TOKEN_LENGTH]
+        with self._tokens_mutex:
+            if token not in self._tokens:
+                raise AuthenticationError("Invalid token, request retrying "
+                                          "or possible replay attack?")
+            self._tokens.remove(token)
+        command = payload[TOKEN_LENGTH:]
+        command = command.decode("UTF-8")
         return command
+
+    def authenticate_token_request(self, request):  # type: (bytes) -> None
+        """Decrypts and authenticates one token request."""
+        payload = self.parse_frame(request)
+        if payload != TOKEN_REQUEST_CONTENT:
+            raise AuthenticationError("Incorrect token request content")
+        return None
 
     def emit_frame(self, data, with_size_header=False):  # type: (bytes, bool) -> bytes
         """Emit one encrypted frame from input data ready to be send to the client."""

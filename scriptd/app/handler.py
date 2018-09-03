@@ -44,10 +44,13 @@ class ScriptdHandler(object):
             return self._do_execution(command)
         except AuthenticationError as e:
             self._logger.info("Request authentication failed: {}".format(str(e)))
-            return Response("")
+            return Response("", status=403)
         except ScriptdError as e:
             self._logger.info("Rejected execution request: {}".format(str(e)))
-            return Response(self._pr.emit_frame(str(e), with_size_header=True))
+            return Response(self._pr.emit_frame(six.binary_type(e), with_size_header=True))
+        except Exception as e:
+            self._logger.info("Caught unexpected exception: {}".format(str(e)))
+            return Response("", status=500)
 
     def _do_execution(self, command):  # type: (Text) -> Response
         try:
@@ -69,3 +72,17 @@ class ScriptdHandler(object):
                     break
 
         return Response(gen(), mimetype="application/octet-stream")
+
+    def handle_token_request(self):  # type: () -> Response
+        try:
+            self._logger.info("Accept token request from: {}".format(self._fh.get_remote_addr()))
+            req = self._fh.get_request_data()
+            self._pr.authenticate_token_request(req)
+            token = self._pr.generate_token()
+            return Response(self._pr.emit_frame(token))
+        except AuthenticationError as e:
+            self._logger.info("Request authentication failed: {}".format(str(e)))
+            return Response("", status=403)
+        except Exception as e:
+            self._logger.info("Caught unexpected exception: {}".format(str(e)))
+            return Response("", status=500)

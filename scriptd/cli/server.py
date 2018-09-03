@@ -6,8 +6,8 @@ import six
 from flask import Flask
 
 from scriptd.app import app
-from scriptd.app import handler
-from scriptd.app import protocol
+from scriptd.app import handler_
+from scriptd.app import protocol_
 from scriptd.app import util
 
 
@@ -31,8 +31,8 @@ def main():
         key = util.derive_key_from_key_file(args.key_file)
     else:
         key = args.key.encode("UTF-8")
-    protocol.set_key(key)
-    handler.set_working_dir(args.dir)
+    protocol_.set_key(key)
+    handler_.set_working_dir(args.dir)
     # XXX: pass these parameters before initing app so that these can be set var constructor
 
     Flask.run(app, args.host, args.port, threaded=True)

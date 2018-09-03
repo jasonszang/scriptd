@@ -9,13 +9,14 @@ import six
 
 from scriptd.app import util
 from scriptd.app.exceptions import AuthenticationError
+import scriptd.app.protocol
 from scriptd.app.protocol import ScriptdProtocol
 
 
 def main():
     argparser = argparse.ArgumentParser(description="Scriptd client")
-    argparser.add_argument("-H", "--host", type=six.text_type, default=u"localhost",
-                           help="Server ip or name, default: localhost")
+    argparser.add_argument("-H", "--host", type=six.text_type, default=u"127.0.0.1",
+                           help="Server ip or name, default: 127.0.0.1")
     argparser.add_argument("-p", "--port", type=int, default=u"8182",
                            help="Server port, default: 8182")
     key_group = argparser.add_mutually_exclusive_group(required=False)
@@ -33,20 +34,30 @@ def main():
     else:
         key = args.key.encode("UTF-8")
 
-    protocol = ScriptdProtocol()
-    protocol.set_key(key)
+    protocol_ = ScriptdProtocol()
+    protocol_.set_key(key)
 
+    token_resp = requests.post(
+        "http://{}:{}/token".format(args.host, args.port),
+        data=protocol_.emit_frame(scriptd.app.protocol.TOKEN_REQUEST_CONTENT),
+        headers={"Expect": ""}
+    )
+    token_resp.raise_for_status()
+    token = protocol_.parse_frame(token_resp.content)
+
+    execution_request_payload = token + args.command.encode("UTF-8")
     resp = requests.post("http://{}:{}/execute".format(args.host, args.port),
-                         data=protocol.emit_frame(args.command.encode("UTF-8")),
+                         data=protocol_.emit_frame(execution_request_payload),
+                         headers={"Expect": ""},
                          stream=True)
 
     response_empty = True
     try:
         while True:
-            frame = protocol.read_frame_from(resp.raw)
+            frame = protocol_.read_frame_from(resp.raw)
             if frame is None:
                 break
-            frame_data = protocol.parse_frame(frame)
+            frame_data = protocol_.parse_frame(frame)
             if six.PY3:
                 sys.stdout.buffer.write(frame_data)
             else:
