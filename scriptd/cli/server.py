@@ -14,7 +14,7 @@ def main():
     argparser = argparse.ArgumentParser(description="Scriptd server")
     argparser.add_argument("-H", "--host", type=six.text_type, default=u"0.0.0.0",
                            help="Host name to listen on, default: 0.0.0.0")
-    argparser.add_argument("-p", "--port", type=six.text_type, default=u"8182",
+    argparser.add_argument("-p", "--port", type=int, default=u"8182",
                            help="Port to listen on, default: 8182")
     argparser.add_argument("-k", "--key", type=six.text_type, default=u"",
                            help="Authentication key, default: empty")

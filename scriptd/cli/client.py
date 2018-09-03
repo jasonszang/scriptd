@@ -13,9 +13,12 @@ from scriptd.app.protocol import ScriptdProtocol
 
 def main():
     argparser = argparse.ArgumentParser(description="Scriptd client")
-    argparser.add_argument("host", type=six.text_type, help="Host ip or name")
-    argparser.add_argument("port", type=int, help="Host port")
-    argparser.add_argument("key", type=six.text_type, help="Authentication key")
+    argparser.add_argument("-H", "--host", type=six.text_type, default=u"localhost",
+                           help="Server ip or name, default: localhost")
+    argparser.add_argument("-p", "--port", type=int, default=u"8182",
+                           help="Server port, default: 8182")
+    argparser.add_argument("-k", "--key", type=six.text_type, default=u"",
+                           help="Authentication key, default: empty")
     argparser.add_argument("command", type=six.text_type,
                            help="Name of the script to run on server")
 
