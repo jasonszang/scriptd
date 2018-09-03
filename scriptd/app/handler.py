@@ -1,7 +1,5 @@
 # -*- coding: UTF-8 -*-
 """Request handler"""
-from __future__ import print_function
-
 import os
 import subprocess
 

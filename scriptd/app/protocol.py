@@ -5,15 +5,16 @@ import os
 import struct
 from hashlib import sha256
 
+from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher
 from cryptography.hazmat.primitives.ciphers.algorithms import AES
 from cryptography.hazmat.primitives.ciphers.modes import GCM
-from cryptography.exceptions import InvalidTag
-from scriptd.app.exceptions import AuthenticationError
 from typing import (BinaryIO,
                     Optional,
                     Text)
+
+from scriptd.app.exceptions import AuthenticationError
 
 IV_SIZE = 12
 
@@ -31,7 +32,7 @@ class ScriptdProtocol(object):
 
     def generate_token(self):  # type: () -> bytes
         """Generate a one-time-use token"""
-        # TODO: generate cryptically safe random token, store token
+        # TODO: generate cryptographically safe random token, store token
         return b"dummy"
 
     def parse_execution_request(self, request):  # type: (bytes) -> Text

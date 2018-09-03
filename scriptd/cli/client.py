@@ -7,6 +7,7 @@ import sys
 import requests
 import six
 
+from scriptd.app import util
 from scriptd.app.exceptions import AuthenticationError
 from scriptd.app.protocol import ScriptdProtocol
 
@@ -17,22 +18,26 @@ def main():
                            help="Server ip or name, default: localhost")
     argparser.add_argument("-p", "--port", type=int, default=u"8182",
                            help="Server port, default: 8182")
-    argparser.add_argument("-k", "--key", type=six.text_type, default=u"",
+    key_group = argparser.add_mutually_exclusive_group(required=False)
+    key_group.add_argument("-k", "--key", type=six.text_type, default=u"",
                            help="Authentication key, default: empty")
+    key_group.add_argument("--key-file", type=six.text_type,
+                           help="Authentication key file. Its salted hash will be used as key.")
     argparser.add_argument("command", type=six.text_type,
                            help="Name of the script to run on server")
 
     args = argparser.parse_args()
-    host = args.host
-    port = args.port
-    cmd = args.command
-    key = args.key.encode("UTF-8")
+
+    if args.key_file is not None:
+        key = util.derive_key_from_key_file(args.key_file)
+    else:
+        key = args.key.encode("UTF-8")
 
     protocol = ScriptdProtocol()
     protocol.set_key(key)
 
-    resp = requests.post("http://{}:{}/execute".format(host, port),
-                         data=protocol.emit_frame(cmd.encode("UTF-8")),
+    resp = requests.post("http://{}:{}/execute".format(args.host, args.port),
+                         data=protocol.emit_frame(args.command.encode("UTF-8")),
                          stream=True)
 
     response_empty = True
@@ -48,9 +53,9 @@ def main():
                 sys.stdout.write(frame_data)
             response_empty = False
     except AuthenticationError:
-        six.print_("Authentication failed, fake server?")
+        six.print_("Authentication failed, fake server?", file=sys.stderr)
     if response_empty:
-        six.print_("Empty response, incorrect key or invalid server?")
+        six.print_("Empty response, incorrect key or invalid server?", file=sys.stderr)
 
 
 if __name__ == "__main__":
