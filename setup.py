@@ -4,10 +4,12 @@
 from setuptools import setup
 from setuptools import find_packages
 
+with open("README.md", "r") as fin:
+    long_description = fin.read()
 
 setup(
     name="scriptd",
-    version="0.2.0",
+    version="0.5.0",
     packages=find_packages(include=["scriptd*"]),
 
     install_requires=[
@@ -31,6 +33,8 @@ setup(
     description="Scriptd lets you execute a set of preconfigured scripts or executables via "
                 "HTTP API, securely, without exposing terminal access, "
                 "and with almost no configurations.",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     license="MIT",
     keywords="",
     url="https://github.com/jasonszang/scriptd",

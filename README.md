@@ -51,6 +51,22 @@ Prepare an arbitrary-sized key-file that acts as the secret key. Name it `~/scri
 
 Run `scriptd --key-file ~/scriptd_home/key -d ~/scriptd_home` to start the server.
 
-You can now invoke scripts in `scriptd_home` remotely from clients with `scriptc -H <your-server> --key-file <key-file-path> <script-name>`. Scripts will be invoked from `~/scriptd_home` on your server. Both stdout and stderr of the invoked script will be sent to your client encrypted.
+You can now invoke scripts in `scriptd_home` remotely from clients with:
 
+```scriptc -H <your-server> --key-file <key-file-path> <script-name>```
 
+ Scripts will be invoked from `~/scriptd_home` on your server. Both stdout and stderr of the invoked script will be sent to your client encrypted.
+
+### Installation
+
+To install scriptd simply run:
+
+```bash
+pip install -U scriptd 
+```
+
+To install to a Unix global python environment use 
+
+```bash
+sudo -H pip install -U scriptd
+```
