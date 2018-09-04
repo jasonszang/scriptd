@@ -28,8 +28,20 @@ setup(
     # metadata for upload to PyPI
     author="jasonszang",
     author_email="jasonszang@126.com",
-    description="",
-    license="BSD 2-Clause",
+    description="Scriptd lets you execute a set of preconfigured scripts or executables via "
+                "HTTP API, securely, without exposing terminal access, "
+                "and with almost no configurations.",
+    license="MIT",
     keywords="",
-    url="",  # project home page, if any
+    url="https://github.com/jasonszang/scriptd",
+    classifiers=[
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.3",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Operating System :: OS Independent",
+    ]
 )

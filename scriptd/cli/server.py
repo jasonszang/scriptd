@@ -21,7 +21,7 @@ def main():
     key_group.add_argument("-k", "--key", type=six.text_type, default=u"",
                            help="Authentication key, default: empty")
     key_group.add_argument("--key-file", type=six.text_type,
-                           help="Authentication key file. Its salted hash will be used as key.")
+                           help="Authentication key file. Key will be derived from its hash.")
     argparser.add_argument("-d", "--dir", type=six.text_type, default=u".",
                            help="Working directory, default: current dir")
 
