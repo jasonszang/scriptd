@@ -37,7 +37,7 @@ class ScriptdHandler(object):
                 raise NotPermittedError("Scripts in subdirectories are not allowed")
             if command not in os.listdir(self._working_dir):
                 raise NoSuchScriptError("No such script")
-            if not os.access(command, os.X_OK):
+            if not os.access(os.path.join(self._working_dir, command), os.X_OK):
                 raise NotPermittedError("File has no execution permission")
             self._logger.info("Executing command \"{}\" upon request from: {}"
                               .format(command, self._fh.get_remote_addr()))
