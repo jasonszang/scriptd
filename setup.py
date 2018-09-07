@@ -9,7 +9,7 @@ with open("README.md", "r") as fin:
 
 setup(
     name="scriptd",
-    version="0.5.0",
+    version="0.5.1",
     packages=find_packages(include=["scriptd*"]),
 
     install_requires=[
